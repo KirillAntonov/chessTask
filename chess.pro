@@ -21,4 +21,5 @@ SOURCES += \
 
 HEADERS += \
     chessboard.h \
-    chessfunctions.h
+    chessfunctions.h \
+    movetemplate.h

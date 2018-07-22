@@ -1,4 +1,42 @@
 #include "chessfunctions.h"
+#include "movetemplate.h"
+
+void move(std::vector<ChessBoard> &result, const ChessBoard &cb, char file, int rank, const MoveTemplate &mt,
+          bool canTake = true, bool canNotTake = true)
+{
+    char newFile;
+    int newRank;
+
+    for(auto direction = mt.begin(); direction != mt.end(); ++direction)
+    {
+        for(auto attempt = direction->begin(); attempt != direction->end(); ++attempt)
+        {
+            newFile = file + attempt->first;
+            newRank = rank + attempt->second;
+            if(newFile < 1 || newFile > 8 || newRank < 1 || newRank > 8)
+            {
+
+                break;
+            }
+
+            if(!cb.isEmpty(file + attempt->first, rank + attempt->second))
+            {
+                if(canTake && !ChessFunctions::ownPiece(cb.getPiece(file, rank), cb.getTurn()))
+                {
+                    result.push_back(cb.move(file, rank, newFile, newRank));
+                }
+                break;
+            }
+            if(canNotTake)
+            {
+                result.push_back(cb.move(file, rank, newFile, newRank));
+            }
+        }
+    }
+}
+
+// Regular functions
+
 
 std::vector<ChessBoard> ChessFunctions::getPossibleMoves(ChessBoard cb)
 {
@@ -17,16 +55,18 @@ std::vector<ChessBoard> ChessFunctions::getPossibleMoves(ChessBoard cb)
         switch(*it)
         {
         case 'p':
-            if(rank < 8) //То можно вперед
-            {
-                if(cb.isEmpty(file, rank+1))
-                {
-                    result.push_back(cb.move(file, rank, file, rank+1));
-                }
-            }
+            move(result, cb, file, rank, pawnWhiteMoveNotTake, false, true);
+            move(result, cb, file, rank, pawnWhiteMoveTake, true, false);
+            break;
         case 'P':
+            move(result, cb, file, rank, pawnBlackMoveNotTake, false, true);
+            move(result, cb, file, rank, pawnBlackMoveTake, true, false);
+            break;
+        case 'b':
+            break;
         }
     }
+    return result;
 }
 
 bool ChessFunctions::ownPiece(ChessPiece cp, PlayerColour turn)
